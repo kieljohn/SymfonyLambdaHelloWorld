@@ -1,0 +1,36 @@
+service: LambdaHelloWorld
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  memorySize: 512 # optional, in MB, default is 1024
+  timeout: 10 # optional, in seconds, default is 6
+  versionFunctions: false # optional, default is true
+  stage: LIVE
+  region: eu-west-1
+
+package:
+  exclude:
+    - '*'
+    - '**'
+  include:
+    - bref.php
+    - 'src/**'
+    - 'vendor/**'
+    - composer.json # Symfony uses it to figure out the root directory
+    - 'bin/**'
+    - 'config/**'
+    - 'var/cache/prod/**' # We want to deploy the production caches
+
+functions:
+  # By default we create one "main" function
+  main:
+    handler: handler.handle
+    timeout: 20 # Timeout in seconds, the default is 6 seconds
+    # The function will match all HTTP URLs
+    events:
+      - http: 'ANY /'
+      - http: 'ANY {proxy+}'
+    environment:
+      APP_ENV: 'prod'
+      APP_DEBUG: '0'
